@@ -2,7 +2,7 @@ import os
 import facebook
 import json
 import re
-from flask import Flask
+from flask import *
 from member import Member
 from apscheduler.scheduler import Scheduler
 
@@ -74,19 +74,19 @@ def populate_data():
     d = json.loads(jjson)
     
     for post in d['data']:
-        poster = Member.make_or_get_member(post['from']['name'])
+        poster = Member.make_or_get_member(post['from']['name'], post['from']['id'])
         poster.add_post(post)
         
         if 'comments' in post:
             comments = post['comments']['data']
             for comment in comments:
-                commenter = Member.make_or_get_member(comment['from']['name'])
+                commenter = Member.make_or_get_member(comment['from']['name'], comment['from']['id'])
                 commenter.add_comment(comment)
                 
         if 'likes' in post:
             likes = post['likes']['data']
             for like in likes:
-                liker = Member.make_or_get_member(like['name'])
+                liker = Member.make_or_get_member(like['name'], like['id'])
                 liker.add_liked_post(post)
                 
     for member in Member.members.values():
@@ -103,13 +103,18 @@ def populate_data():
 
 @app.route('/')
 def root():
-    return 'Hello World!'
+    return render_template('index.htm')
+    
+@app.route('/m/<name>')
+def member(name):
+    m = Member.make_or_get_member(name)
+    words = m.get_stat('MOST_COMMON_WORDS')
+    return render_template('member.htm', name=name, uid=m.get_uid(), words=json.dumps(words))
 
 if __name__ == '__main__':
-    
-    
     #sched.add_interval_job(poo, seconds=1)
+    populate_data()
     
     # Bind to PORT if defined, otherwise default to 5000.
-    #port = int(os.environ.get('PORT', 5000))
-    #app.run(host='0.0.0.0', port=port, debug=True)#, use_reloader=False)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)#, use_reloader=False)

@@ -19,14 +19,15 @@ class Member:
     }
     
     @classmethod
-    def make_or_get_member(self, name):
+    def make_or_get_member(self, name, uid=0):
         if name in Member.members:
             return Member.members[name]
         else:
-            return Member(name)
+            return Member(name, uid)
     
-    def __init__(self, name):
+    def __init__(self, name, uid):
         self._name = name
+        self._uid = uid
         self._posts = []
         self._comments = []
         self._liked_posts = []
@@ -44,6 +45,9 @@ class Member:
         
     def get_name(self):
         return self._name
+        
+    def get_uid(self):
+        return self._uid
         
     def get_posts(self):
         return self._posts
