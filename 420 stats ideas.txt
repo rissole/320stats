@@ -1,0 +1,22 @@
+Per member:
+number of posts
+number of comments
+total likes given
+total likes received
+likes given on posts
+likes given on comments
+likes received on posts
+likes received on comments
+who liked me the most
+average comment length
+comment content word cloud
+irrelevant post count
+
+Global:
+total posts
+total comments
+total likes
+most liked posts
+most liked comments
+overall comment word cloud
+estimated facebook server usage
