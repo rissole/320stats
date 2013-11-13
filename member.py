@@ -1,3 +1,5 @@
+import wordcloud
+
 class Member:
     # {name -> class obj} of existing members
     members = {}
@@ -13,6 +15,7 @@ class Member:
         'IRRELEVANT_POSTS': 'Irrelevant posts',
         'AVERAGE_COMMENT_LENGTH': 'Average comment length (chars)',
         'LONGEST_COMMENT': 'Longest comment',
+        'MOST_COMMON_WORDS': 'Most common words',
     }
     
     @classmethod
@@ -177,3 +180,13 @@ class Member:
         
         self._stats['LONGEST_COMMENT'] = {'id': longest_comment['id'], 'message': longest_comment['message']}
         return self._stats['LONGEST_COMMENT']
+        
+    # MOST_COMMON_WORDS
+    def calc_most_common_words(self):
+        cached = self.get_stat('MOST_COMMON_WORDS')
+        if cached != None:
+            return cached
+            
+        text = ' '.join(c['message'] for c in self._comments)
+        self._stats['MOST_COMMON_WORDS'] = wordcloud.get_top_words(text.lower())
+        return self._stats['MOST_COMMON_WORDS']

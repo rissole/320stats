@@ -67,15 +67,12 @@ def get_lastcheck():
         lastcheck = float(lastcheck)
     print 'Checking... lastcheck=' + str(lastcheck)
     return lastcheck
-
-@app.route('/')
-def root():
-    return 'Hello World!'
-
-if __name__ == '__main__':
+    
+def populate_data():
     with open(GROUPS['320']+'_feed.json') as f:
         jjson = f.read()
     d = json.loads(jjson)
+    
     for post in d['data']:
         poster = Member.make_or_get_member(post['from']['name'])
         poster.add_post(post)
@@ -102,8 +99,14 @@ if __name__ == '__main__':
         member.calc_num_irrelevant_posts()
         member.calc_average_comment_length()
         member.calc_longest_comment()
-        member.print_stats()
-        print ''
+        member.calc_most_common_words()
+
+@app.route('/')
+def root():
+    return 'Hello World!'
+
+if __name__ == '__main__':
+    
     
     #sched.add_interval_job(poo, seconds=1)
     
