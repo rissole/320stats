@@ -100,6 +100,7 @@ def populate_data():
         member.calc_average_comment_length()
         member.calc_longest_comment()
         member.calc_most_common_words()
+        member.calc_whose_posts_were_liked()
 
 @app.route('/')
 def root():
@@ -109,7 +110,17 @@ def root():
 def member(name):
     m = Member.make_or_get_member(name)
     words = m.get_stat('MOST_COMMON_WORDS')
-    return render_template('member.htm', name=name, uid=m.get_uid(), words=json.dumps(words))
+    post_likes = m.get_stat('WHO_LIKED_MY_POSTS')
+    total_post_likes = m.get_stat('POST_LIKES_RECEIVED')
+    post_likes_given = m.get_stat('WHOSE_POSTS_WERE_LIKED')
+    tplg = m.get_stat('NUM_LIKED_POSTS')
+    total_posts = m.get_stat('NUM_POSTS')
+    total_comments = m.get_stat('NUM_COMMENTS')
+    
+    return render_template('member.htm', name=name, uid=m.get_uid(), \
+    words=words, post_likes=post_likes, total_post_likes=total_post_likes, \
+    post_likes_given=post_likes_given, total_post_likes_given=tplg, \
+    total_posts=total_posts, total_comments=total_comments)
 
 if __name__ == '__main__':
     #sched.add_interval_job(poo, seconds=1)

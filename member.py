@@ -9,6 +9,7 @@ class Member:
         'NUM_POSTS': 'Posts',
         'NUM_COMMENTS': 'Comments',
         'NUM_LIKED_POSTS': 'Posts likes given',
+        'WHOSE_POSTS_WERE_LIKED': 'Whose posts were liked',
         'POST_LIKES_RECEIVED': 'Post likes received',
         'COMMENT_LIKES_RECEIVED': 'Comment likes received',
         'WHO_LIKED_MY_POSTS': 'Users who liked my posts',
@@ -141,8 +142,26 @@ class Member:
                 for like in post['likes']['data']:
                     likes[like['name']] += 1
         
+        likes = [(x[0], x[1]) for x in likes.iteritems()]
         self._stats['WHO_LIKED_MY_POSTS'] = likes
         return self._stats['WHO_LIKED_MY_POSTS']
+        
+    # WHOSE_POSTS_WERE_LIKED
+    def calc_whose_posts_were_liked(self):
+        cached = self.get_stat('WHOSE_POSTS_WERE_LIKED')
+        if cached != None:
+            return cached
+        
+        likes = {}
+        for name in Member.members.keys():
+            likes[name] = 0
+            
+        for post in self._liked_posts:
+            likes[post['from']['name']] += 1
+        
+        likes = [(x[0], x[1]) for x in likes.iteritems()]
+        self._stats['WHOSE_POSTS_WERE_LIKED'] = likes
+        return self._stats['WHOSE_POSTS_WERE_LIKED']
         
     # IRRELEVANT_POSTS
     def calc_num_irrelevant_posts(self):
@@ -191,6 +210,6 @@ class Member:
         if cached != None:
             return cached
             
-        text = ' '.join(c['message'] for c in self._comments)
-        self._stats['MOST_COMMON_WORDS'] = wordcloud.get_top_words(text.lower())
+        text = ' '.join(c['message'] for c in self._comments).lower()
+        self._stats['MOST_COMMON_WORDS'] = wordcloud.get_top_words(text)
         return self._stats['MOST_COMMON_WORDS']

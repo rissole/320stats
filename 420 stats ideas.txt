@@ -11,6 +11,7 @@ who liked me the most
 average comment length
 comment content word cloud
 irrelevant post count
+blazed posts
 
 Global:
 total posts

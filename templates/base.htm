@@ -2,7 +2,9 @@
 <html>
 <head>
     {% block head %}
+    {% block css %}
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
+    {% endblock %}
     <title>{% block title %}{% endblock %} - 320 Stats</title>
     {% endblock %}
 </head>
@@ -31,7 +33,7 @@
     </div>
     
     {% block scripts %}
-    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
     {% endblock %}
 </body>
