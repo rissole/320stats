@@ -17,6 +17,7 @@ class Member:
         'AVERAGE_COMMENT_LENGTH': 'Average comment length (chars)',
         'LONGEST_COMMENT': 'Longest comment',
         'MOST_COMMON_WORDS': 'Most common words',
+        'BLAZED_POSTS': 'Posts that were liked by all',
     }
     
     @classmethod
@@ -213,3 +214,22 @@ class Member:
         text = ' '.join(c['message'] for c in self._comments).lower()
         self._stats['MOST_COMMON_WORDS'] = wordcloud.get_top_words(text)
         return self._stats['MOST_COMMON_WORDS']
+        
+    # BLAZED_POSTS
+    def calc_blazed_posts(self):
+        cached = self.get_stat('BLAZED_POSTS')
+        if cached != None:
+            return cached
+        
+        members_set = set(Member.members.keys())
+        posts = []
+        for post in self._posts:
+            if 'likes' in post:
+                poster = post['from']['name']
+                blazed_members_set = members_set.copy()
+                blazed_members_set.discard(poster)
+                if len(blazed_members_set - set(m['name'] for m in post['likes']['data'])) == 0:
+                    posts.append({'id': post['id'], 'message': post['message'][:50]+'...' if 'message' in post else '[Image]'})
+                    
+        self._stats['BLAZED_POSTS'] = posts
+        return self._stats['BLAZED_POSTS']

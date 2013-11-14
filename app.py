@@ -101,6 +101,7 @@ def populate_data():
         member.calc_longest_comment()
         member.calc_most_common_words()
         member.calc_whose_posts_were_liked()
+        member.calc_blazed_posts()
 
 @app.route('/')
 def root():
@@ -116,11 +117,12 @@ def member(name):
     tplg = m.get_stat('NUM_LIKED_POSTS')
     total_posts = m.get_stat('NUM_POSTS')
     total_comments = m.get_stat('NUM_COMMENTS')
+    blazed_posts = m.get_stat('BLAZED_POSTS')
     
     return render_template('member.htm', name=name, uid=m.get_uid(), \
     words=words, post_likes=post_likes, total_post_likes=total_post_likes, \
     post_likes_given=post_likes_given, total_post_likes_given=tplg, \
-    total_posts=total_posts, total_comments=total_comments)
+    total_posts=total_posts, total_comments=total_comments, blazed_posts=blazed_posts)
 
 if __name__ == '__main__':
     #sched.add_interval_job(poo, seconds=1)
