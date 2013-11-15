@@ -176,7 +176,7 @@ class Member:
                 continue
             if 'comments' in post:
                 continue
-            posts.append(post['id'])
+            posts.append({'id': post['id'], 'message': post['message'][:50]+'...' if 'message' in post else '[Image]'})
         
         self._stats['IRRELEVANT_POSTS'] = posts
         return self._stats['IRRELEVANT_POSTS']

@@ -3,6 +3,7 @@ import facebook
 import json
 import re
 from flask import *
+from jinja2 import evalcontextfilter, Markup, escape
 from member import Member
 from apscheduler.scheduler import Scheduler
 
@@ -105,24 +106,16 @@ def populate_data():
 
 @app.route('/')
 def root():
-    return render_template('index.htm')
+    return render_template('group.htm')
     
 @app.route('/m/<name>')
 def member(name):
     m = Member.make_or_get_member(name)
-    words = m.get_stat('MOST_COMMON_WORDS')
-    post_likes = m.get_stat('WHO_LIKED_MY_POSTS')
-    total_post_likes = m.get_stat('POST_LIKES_RECEIVED')
-    post_likes_given = m.get_stat('WHOSE_POSTS_WERE_LIKED')
-    tplg = m.get_stat('NUM_LIKED_POSTS')
-    total_posts = m.get_stat('NUM_POSTS')
-    total_comments = m.get_stat('NUM_COMMENTS')
-    blazed_posts = m.get_stat('BLAZED_POSTS')
+    stats = {}
+    for stat in Member.stats.keys():
+        stats[stat] = m.get_stat(stat)
     
-    return render_template('member.htm', name=name, uid=m.get_uid(), \
-    words=words, post_likes=post_likes, total_post_likes=total_post_likes, \
-    post_likes_given=post_likes_given, total_post_likes_given=tplg, \
-    total_posts=total_posts, total_comments=total_comments, blazed_posts=blazed_posts)
+    return render_template('member.htm', stats=stats, uid=m.get_uid(), name=m.get_name())
 
 if __name__ == '__main__':
     #sched.add_interval_job(poo, seconds=1)
