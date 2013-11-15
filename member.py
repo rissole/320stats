@@ -20,12 +20,16 @@ class Member:
         'BLAZED_POSTS': 'Posts that were liked by all',
     }
     
-    @classmethod
-    def make_or_get_member(self, name, uid=0):
+    @staticmethod
+    def make_or_get_member(name, uid=0):
         if name in Member.members:
             return Member.members[name]
         else:
             return Member(name, uid)
+            
+    @staticmethod
+    def get_member_names():
+        return sorted(Member.members.keys())
     
     def __init__(self, name, uid):
         self._name = name
