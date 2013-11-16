@@ -1,8 +1,6 @@
 import wordcloud
 
 class Member:
-    # {name -> class obj} of existing members
-    members = {}
     
     # stat enum, keys of this dict are valid keys for _stats
     stats = {
@@ -19,26 +17,15 @@ class Member:
         'MOST_COMMON_WORDS': 'Most common words',
         'BLAZED_POSTS': 'Posts that were liked by all',
     }
-    
-    @staticmethod
-    def make_or_get_member(name, uid=0):
-        if name in Member.members:
-            return Member.members[name]
-        else:
-            return Member(name, uid)
-            
-    @staticmethod
-    def get_member_names():
-        return sorted(Member.members.keys())
-    
-    def __init__(self, name, uid):
+
+    def __init__(self, name, uid, group):
         self._name = name
         self._uid = uid
+        self._group = group
         self._posts = []
         self._comments = []
         self._liked_posts = []
         self._stats = {}
-        Member.members[name] = self
         
     def add_post(self, p):
         self._posts.append(p)
@@ -54,6 +41,9 @@ class Member:
         
     def get_uid(self):
         return self._uid
+        
+    def get_group(self):
+        return self._group
         
     def get_posts(self):
         return self._posts
@@ -139,7 +129,7 @@ class Member:
             return cached
         
         likes = {}
-        for name in Member.members.keys():
+        for name in self._group.get_member_names():
             likes[name] = 0
             
         for post in self._posts:
@@ -158,7 +148,7 @@ class Member:
             return cached
         
         likes = {}
-        for name in Member.members.keys():
+        for name in self._group.get_member_names():
             likes[name] = 0
             
         for post in self._liked_posts:
@@ -225,7 +215,7 @@ class Member:
         if cached != None:
             return cached
         
-        members_set = set(Member.members.keys())
+        members_set = set(self._group.get_member_names())
         posts = []
         for post in self._posts:
             if 'likes' in post:
