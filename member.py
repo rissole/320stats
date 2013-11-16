@@ -59,75 +59,41 @@ class Member:
         for stat_key, stat in Member.stats.items():
             print stat + ':', self.get_stat(stat_key)
     
-    # returns None if stat not set
     def get_stat(self, stat_key):
         return self._stats.get(stat_key)
-        
-    # forces the stat to be recalculated next time it's requested
-    def purge_stat(self, stat_key):
-        self._stats.pop(stat_key, None)
     
     # STATS CALCS #
     # NUM_POSTS
     def calc_num_posts(self):
-        cached = self.get_stat('NUM_POSTS')
-        if cached != None:
-            return cached
-        
         self._stats['NUM_POSTS'] = len(self._posts)
-        return self._stats['NUM_POSTS']
         
     # NUM_COMMENTS
     def calc_num_comments(self):
-        cached = self.get_stat('NUM_COMMENTS')
-        if cached != None:
-            return cached
-        
         self._stats['NUM_COMMENTS'] = len(self._comments)
-        return self._stats['NUM_COMMENTS']
         
     # NUM_LIKED_POSTS
     def calc_num_liked_posts(self):
-        cached = self.get_stat('NUM_LIKED_POSTS')
-        if cached != None:
-            return cached
-        
         self._stats['NUM_LIKED_POSTS'] = len(self._liked_posts)
-        return self._stats['NUM_LIKED_POSTS']
     
     # POST_LIKES_RECEIVED
-    def calc_post_likes_received(self):
-        cached = self.get_stat('POST_LIKES_RECEIVED')
-        if cached != None:
-            return cached
-        
+    def calc_post_likes_received(self):      
         likes = 0
         for post in self._posts:
             if 'likes' in post:
                 likes += len(post['likes']['data'])
         
         self._stats['POST_LIKES_RECEIVED'] = likes
-        return self._stats['POST_LIKES_RECEIVED']
         
     # COMMENT_LIKES_RECEIVED
     def calc_comment_likes_received(self):
-        cached = self.get_stat('COMMENT_LIKES_RECEIVED')
-        if cached != None:
-            return cached
-        
         likes = 0
         for comment in self._comments:
             likes += comment['like_count']
         
         self._stats['COMMENT_LIKES_RECEIVED'] = likes
-        return self._stats['COMMENT_LIKES_RECEIVED']
         
     # WHO_LIKED_MY_POSTS
     def calc_who_liked_posts(self):
-        cached = self.get_stat('WHO_LIKED_MY_POSTS')
-        if cached != None:
-            return cached
-        
         likes = {}
         for name in self._group.get_member_names():
             likes[name] = 0
@@ -139,14 +105,9 @@ class Member:
         
         likes = [(x[0], x[1]) for x in likes.iteritems()]
         self._stats['WHO_LIKED_MY_POSTS'] = likes
-        return self._stats['WHO_LIKED_MY_POSTS']
         
     # WHOSE_POSTS_WERE_LIKED
     def calc_whose_posts_were_liked(self):
-        cached = self.get_stat('WHOSE_POSTS_WERE_LIKED')
-        if cached != None:
-            return cached
-        
         likes = {}
         for name in self._group.get_member_names():
             likes[name] = 0
@@ -156,14 +117,9 @@ class Member:
         
         likes = [(x[0], x[1]) for x in likes.iteritems()]
         self._stats['WHOSE_POSTS_WERE_LIKED'] = likes
-        return self._stats['WHOSE_POSTS_WERE_LIKED']
         
     # IRRELEVANT_POSTS
     def calc_num_irrelevant_posts(self):
-        cached = self.get_stat('IRRELEVANT_POSTS')
-        if cached != None:
-            return cached
-        
         posts = []
         for post in self._posts:
             if 'likes' in post:
@@ -173,48 +129,28 @@ class Member:
             posts.append({'id': post['id'], 'message': post['message'][:50]+'...' if 'message' in post else '[Image]'})
         
         self._stats['IRRELEVANT_POSTS'] = posts
-        return self._stats['IRRELEVANT_POSTS']
         
     # AVERAGE_COMMENT_LENGTH
     def calc_average_comment_length(self):
-        cached = self.get_stat('AVERAGE_COMMENT_LENGTH')
-        if cached != None:
-            return cached
-        
         total_length = 0
         for comment in self._comments:
             total_length += len(comment['message'])
         
         self._stats['AVERAGE_COMMENT_LENGTH'] = total_length / self.get_stat('NUM_COMMENTS')
-        return self._stats['AVERAGE_COMMENT_LENGTH']
         
     # LONGEST_COMMENT
     def calc_longest_comment(self):
-        cached = self.get_stat('LONGEST_COMMENT')
-        if cached != None:
-            return cached
-        
         longest_comment = max(self._comments, key=lambda x: len(x['message']))
         
         self._stats['LONGEST_COMMENT'] = {'id': longest_comment['id'], 'message': longest_comment['message']}
-        return self._stats['LONGEST_COMMENT']
         
     # MOST_COMMON_WORDS
     def calc_most_common_words(self):
-        cached = self.get_stat('MOST_COMMON_WORDS')
-        if cached != None:
-            return cached
-            
         text = ' '.join(c['message'] for c in self._comments).lower()
         self._stats['MOST_COMMON_WORDS'] = wordcloud.get_top_words(text)
-        return self._stats['MOST_COMMON_WORDS']
         
     # BLAZED_POSTS
     def calc_blazed_posts(self):
-        cached = self.get_stat('BLAZED_POSTS')
-        if cached != None:
-            return cached
-        
         members_set = set(self._group.get_member_names())
         posts = []
         for post in self._posts:
@@ -226,4 +162,3 @@ class Member:
                     posts.append({'id': post['id'], 'message': post['message'][:50]+'...' if 'message' in post else '[Image]'})
                     
         self._stats['BLAZED_POSTS'] = posts
-        return self._stats['BLAZED_POSTS']

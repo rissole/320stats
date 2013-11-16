@@ -137,8 +137,11 @@ def member(name):
     
     return render_template('member.htm', stats=stats, uid=m.get_uid(), name=m.get_name(), members=g320.get_member_names())
 
+def update_cache(group):
+    downloadGroupJSON(group.get_gid())
+    populate_data(g320)
+    
 if __name__ == '__main__':
-    #sched.add_interval_job(poo, seconds=1)
     try:
         with open(g320.get_gid()+'_feed.json'):
             pass
@@ -146,6 +149,8 @@ if __name__ == '__main__':
         downloadGroupJSON(g320.get_gid())
     finally:
         populate_data(g320)
+        
+    sched.add_interval_job(lambda: update_cache(g320), days=1)
     
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(os.environ.get('PORT', 5000))
