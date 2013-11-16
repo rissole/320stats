@@ -110,6 +110,10 @@ def populate_data(group):
     # after member stuff.
     group.calc_num_posts()
     group.calc_num_comments()
+    group.calc_posts_per_member()
+    group.calc_post_likes_per_member()
+    group.calc_comments_per_member()
+    group.calc_comment_likes_per_member()
         
 @app.template_filter('nicenum')
 def nice_num_filter(n):
@@ -118,7 +122,7 @@ def nice_num_filter(n):
 @app.route('/')
 def root():
     stats = {}
-    for stat in g320.stats.keys():
+    for stat in Group.stats.keys():
         stats[stat] = g320.get_stat(stat)
     return render_template('group.htm', stats=stats, members=g320.get_member_names())
     
