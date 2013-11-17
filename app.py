@@ -6,13 +6,8 @@ from flask import *
 from jinja2 import evalcontextfilter, Markup, escape
 from member import Member
 from group import Group
-from apscheduler.scheduler import Scheduler
 
 ### APP SETUP ###
-
-# Start the scheduler
-sched = Scheduler()
-sched.start()
 
 # Prepare Flask
 app = Flask(__name__)
@@ -53,23 +48,9 @@ def downloadGroupJSON(groupID):
         f.write(json.dumps(total_feed))
         
 def get_likers_for_comment(post_id, comment_id):
-	if GET_LIKERS == False:
-		return []
-	else:
-		print('getting liker data')
-		likers_data = GRAPH.get_object(post_id+'_'+comment_id+'/likes', fields='name')
-		likers = [ l['name'] for l in likers_data['data'] ]
-		return likers
-
-def get_lastcheck():
-    # "a+" => open file for reading and writing, does not truncate
-    f = open('lastcheck', 'a+')
-    lastcheck = f.read()
-    f.close()
-    if (lastcheck != ''):
-        lastcheck = float(lastcheck)
-    print 'Checking... lastcheck=' + str(lastcheck)
-    return lastcheck
+    likers_data = GRAPH.get_object(post_id+'_'+comment_id+'/likes', fields='name')
+    likers = [ l['name'] for l in likers_data['data'] ]
+    return likers
     
 def populate_data(group):
     with open(group.get_gid()+'_feed.json', 'r') as f:
@@ -124,7 +105,7 @@ def root():
     stats = {}
     for stat in Group.stats.keys():
         stats[stat] = g320.get_stat(stat)
-    return render_template('group.htm', stats=stats, members=g320.get_member_names())
+    return render_template('index.htm', stats=stats, members=g320.get_member_names())
     
 @app.route('/m/<name>')
 def member(name):
@@ -147,10 +128,8 @@ if __name__ == '__main__':
             pass
     except IOError:
         downloadGroupJSON(g320.get_gid())
-    finally:
-        populate_data(g320)
-        
-    sched.add_interval_job(lambda: update_cache(g320), days=1)
+
+    populate_data(g320)
     
     # Bind to PORT if defined, otherwise default to 5000.
     port = int(os.environ.get('PORT', 5000))

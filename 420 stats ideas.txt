@@ -12,6 +12,9 @@ average comment length
 comment content word cloud
 irrelevant post count
 blazed posts
+post to like ratio
+comment to like ratio
+cheeky self likes
 
 Global:
 total posts
