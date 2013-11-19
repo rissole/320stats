@@ -103,8 +103,7 @@ class Member:
                 for like in post['likes']['data']:
                     likes[like['name']] += 1
         
-        likes = [(x[0], x[1]) for x in likes.iteritems()]
-        self._stats['WHO_LIKED_MY_POSTS'] = likes
+        self._stats['WHO_LIKED_MY_POSTS'] = likes.items()
         
     # WHOSE_POSTS_WERE_LIKED
     def calc_whose_posts_were_liked(self):
@@ -115,8 +114,7 @@ class Member:
         for post in self._liked_posts:
             likes[post['from']['name']] += 1
         
-        likes = [(x[0], x[1]) for x in likes.iteritems()]
-        self._stats['WHOSE_POSTS_WERE_LIKED'] = likes
+        self._stats['WHOSE_POSTS_WERE_LIKED'] = likes.items()
         
     # IRRELEVANT_POSTS
     def calc_num_irrelevant_posts(self):
@@ -136,13 +134,16 @@ class Member:
         for comment in self._comments:
             total_length += len(comment['message'])
         
-        self._stats['AVERAGE_COMMENT_LENGTH'] = total_length / self.get_stat('NUM_COMMENTS')
+        num_comments = self.get_stat('NUM_COMMENTS')
+        self._stats['AVERAGE_COMMENT_LENGTH'] = 0 if num_comments == 0 else total_length / num_comments
         
     # LONGEST_COMMENT
     def calc_longest_comment(self):
-        longest_comment = max(self._comments, key=lambda x: len(x['message']))
-        
-        self._stats['LONGEST_COMMENT'] = {'id': longest_comment['id'], 'message': longest_comment['message']}
+        if len(self._comments) == 0:
+            self._stats['LONGEST_COMMENT'] = {'id': '0', 'message': ''}
+        else:
+            longest_comment = max(self._comments, key=lambda x: len(x['message']))
+            self._stats['LONGEST_COMMENT'] = {'id': longest_comment['id'], 'message': longest_comment['message']}
         
     # MOST_COMMON_WORDS
     def calc_most_common_words(self):

@@ -12,8 +12,9 @@ class Group:
         'COMMENT_LIKES_PER_MEMBER': 'Comments per member',
     }
     
-    def __init__(self, gid):
+    def __init__(self, gid, name):
         self._gid = gid
+        self._name = name
         self._stats = {}
         # (id, name) -> member obj
         self._members = {}
@@ -21,6 +22,9 @@ class Group:
         
     def get_gid(self):
         return self._gid
+        
+    def get_name(self):
+        return self._name
         
     def make_or_get_member(self, name, uid=0):
         if name in self._members:
@@ -45,6 +49,9 @@ class Group:
         
     def get_stat(self, stat_key):
         return self._stats[stat_key]
+        
+    def get_template_vars(self):
+        return {'id': self.get_gid(), 'name': self.get_name(), 'members': self.get_member_names()}
     
     # STATS CALCS #
     # NUM_POSTS

@@ -1,13 +1,31 @@
 {% extends "base.htm" %}
+{% set no_nav = True %}
+{% block head %}
+    <title>Grouple - Cool stats about Facebook groups!</title>
+    {% block css %}
+        {{ super() }}
+        <style>
+            #fb-area > ul {
+                padding-left: 0px;
+                list-style-type: none;
+            }
+        </style>
+    {% endblock %}
+{% endblock %}
 {% block content %}
     <div class="jumbotron text-center">
         <div class="row" style="margin-bottom: 25px;">
             <div class="col-md-12">
-                <h1>Grouple <p class="lead">Cool stats about your Facebook groups.</p></h1>
+                <h1><img style="width:80%; max-width:900px" src="{{ url_for('static', filename='grouple.png') }}" /> <p class="lead">Cool stats about your Facebook groups.</p></h1>
             </div>
         </div>
-        <div class="row">
+        <div id="fb-area" class="row">
+            <h2>1. Login with Facebook to get a list of your groups</h2>
             <fb:login-button size="xlarge" scope="user_groups"></fb:login-button>
+        </div>
+        <div id="fb-area-loggedin" style="display: none">
+            <h2>2. Select a group</h2>
+            <ul></ul>
         </div>
     </div>
 {% endblock %}
@@ -18,8 +36,31 @@
       var js, fjs = d.getElementsByTagName(s)[0];
       if (d.getElementById(id)) return;
       js = d.createElement(s); js.id = id;
-      js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=1394394197467118";
+      js.src = "//connect.facebook.net/en_US/all.js";
       fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
+    
+    window.fbAsyncInit = function() {
+        FB.init({
+            appId      : '1394394197467118',
+            status     : true, // check login status
+            cookie     : true, // enable cookies to allow the server to access the session
+            xfbml      : true  // parse XFBML
+        });
+        FB.Event.subscribe('auth.authResponseChange', function(response) {
+            if (response.status === 'connected') {
+                loadGroups();
+            }
+        });
+    }
+    
+    function loadGroups() {
+        $('#fb-area').html($('#fb-area-loggedin').html());
+        FB.api('/me/groups', function(response) {
+            $.each(response.data, function(i, group) {
+                $('#fb-area > ul').append('<li><a href="/'+group.id+'/">'+group.name+'</a></li>');
+            });
+        });
+    }
     </script>
 {% endblock %}

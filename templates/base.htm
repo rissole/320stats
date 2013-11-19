@@ -4,26 +4,30 @@
     {% block head %}
     {% block css %}
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='logo16.png') }}">
     {% endblock %}
-    <title>{% block title %}{% endblock %} - 320 Stats</title>
+    <title>{% block title %}{% endblock %} - Grouple</title>
     {% endblock %}
 </head>
 <body>
     {% block prescripts %}{% endblock %}
     <nav class="navbar navbar-default" role="navigation">
+        {% if no_nav is not defined %}
         <div class="navbar-header">
-            <a class="navbar-brand" href="/">320 Stats</a>
+            <a class="navbar-brand" href="/">Grouple</a>
             <ul class="nav navbar-nav">
+                <li><a href="/{{ group.id }}/">Stats</a></li>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Members <b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Member Stats<b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                        {% for member in members %}
-                          <li><a href="/m/{{ member }}">{{ member }}</a></li>
+                        {% for member in group.members %}
+                          <li><a href="/{{ group.id }}/m/{{ member }}">{{ member }}</a></li>
                         {% endfor %}
                     </ul>
                 </li>
             </ul>
         </div>
+        {% endif %}
     </nav>
     
     <div class="container">
