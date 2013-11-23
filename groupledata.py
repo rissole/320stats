@@ -1,8 +1,11 @@
 import json
 import facebook
 import re
+import threading
+from group import Group
 
 _groups = {}
+_downloading_groups = []
 
 def get_group(gid):
     # todo: check lastcheck < 1 day or whatever
@@ -85,3 +88,25 @@ def populate_data(group, d):
     group.calc_post_likes_per_member()
     group.calc_comments_per_member()
     group.calc_comment_likes_per_member()
+    
+def is_group_downloading(gid):
+    return (gid in _downloading_groups)
+    
+def start_group_download(gid, oauth):
+    _downloading_groups.append(gid)
+    t = threading.Thread(target=download_group_thread, args = (gid, oauth))
+    t.start()
+    
+def download_group_thread(gid, oauth):
+    try:
+        print "getting group",gid
+        feed = downloadGroupJSON(gid, oauth)
+        group = Group(gid, feed['name'])
+        populate_data(group, feed)
+        add_group(group)
+        _downloading_groups.remove(gid)
+        print "Got group",gid
+    except facebook.GraphAPIError as e:
+        print "Didnt get group",gid,"|",e
+        if e.message == "An unknown error occurred":
+            return 0 #render_template('error.htm', no_nav=True, error={'title': 'Oh jeez...', 'message': 'That group was too big for this little webapp to handle, try a different group.'})

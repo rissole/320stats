@@ -68,18 +68,13 @@ def download_group(gid):
     user = current_user(session)
     if not user or not can_user_see_group(gid, user):
         return render_no_permission_error()
-
-    # TODO: threads and websockets
-    try:
-        feed = groupledata.downloadGroupJSON(gid, user['access_token'])
-    except facebook.GraphAPIError as e:
-        if e.message == "An unknown error occurred":
-            return render_template('error.htm', no_nav=True, error={'title': 'Oh jeez...', 'message': 'That group was too big for this little webapp to handle, try a different group.'})
-            
-    group = Group(gid, feed['name'])
-    groupledata.populate_data(group, feed)
-    groupledata.add_group(group)
-    return render_template('error.htm', no_nav=True, error={'title': 'PLACEHOLDER', 'message': 'REFRESH TO SEE YOUR RESULTS, THIS IS GOING TO BE SOME COOL DOWNLOADING STUFF'})
+        
+    first = False
+    if not groupledata.is_group_downloading(gid):
+        groupledata.start_group_download(gid, user['access_token'])
+        first = True
+     
+    return render_template('error.htm', no_nav=True, error={'title': 'STILL Downloading...' if not first else 'Downloading...', 'message': 'We\'re crunching the numbers as you read this sentence. Refresh the page after a while to see if we\'re ready.'})
     
 @app.route('/<gid>/<name>')
 def member(gid, name):
