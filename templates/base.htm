@@ -21,7 +21,7 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Member Stats<b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         {% for member in group.members %}
-                          <li><a href="/{{ group.id }}/m/{{ member }}">{{ member }}</a></li>
+                          <li><a href="/{{ group.id }}/{{ member }}">{{ member }}</a></li>
                         {% endfor %}
                     </ul>
                 </li>

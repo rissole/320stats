@@ -31,35 +31,19 @@
 {% endblock %}
 {% block prescripts %}
     <div id="fb-root"></div>
+    <script src="{{ url_for('static', filename='grouple-facebook.js') }}"></script>
     <script>
-    (function(d, s, id) {
-      var js, fjs = d.getElementsByTagName(s)[0];
-      if (d.getElementById(id)) return;
-      js = d.createElement(s); js.id = id;
-      js.src = "//connect.facebook.net/en_US/all.js";
-      fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'facebook-jssdk'));
-    
     window.fbAsyncInit = function() {
-        FB.init({
-            appId      : '1394394197467118',
-            status     : true, // check login status
-            cookie     : true, // enable cookies to allow the server to access the session
-            xfbml      : true  // parse XFBML
-        });
+        initFB();
         FB.Event.subscribe('auth.authResponseChange', function(response) {
             if (response.status === 'connected') {
-                loadGroups();
+                $('#fb-area').html($('#fb-area-loggedin').html());
+                FB.api('/me/groups', { fields: 'id,name' }, function(response) {
+                    $.each(response.data, function(i, group) {
+                        $('#fb-area > ul').append('<li><a href="/'+group.id+'/">'+group.name+'</a></li>');
+                    });
+                });
             }
-        });
-    }
-    
-    function loadGroups() {
-        $('#fb-area').html($('#fb-area-loggedin').html());
-        FB.api('/me/groups', function(response) {
-            $.each(response.data, function(i, group) {
-                $('#fb-area > ul').append('<li><a href="/'+group.id+'/">'+group.name+'</a></li>');
-            });
         });
     }
     </script>

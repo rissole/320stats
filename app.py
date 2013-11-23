@@ -15,28 +15,48 @@ app = Flask(__name__)
 GROUPLE_APP_ID = '1394394197467118'
 with open('appsecret') as f:
     GROUPLE_APP_SECRET = f.read()
+    
+# Flask cookie secret
+with open('cookiesecret') as f:
+    app.secret_key = f.read()
 
 #################
         
 @app.template_filter('nicenum')
 def nice_num_filter(n):
     return '{:,}'.format(n)
+    
+def render_no_permission_error():
+    return render_template('error.htm', no_nav=True, error={'title': 'Nah mate', 'message': 'You actually don\'t have permissions to view that group. Or maybe your cookie\'s expired. Just go home and start again.'})
+    
+def current_user(session):
+    if 'user' in session:
+        return session['user']
 
+    cookie = facebook.get_user_from_cookie(request.cookies, GROUPLE_APP_ID, GROUPLE_APP_SECRET)
+    if cookie:
+        session['user'] = {'access_token': cookie['access_token'], 'groups': groupledata.fetch_groups_for_user(cookie['access_token'])}
+        return session['user']
+        
+    return None
+    
+def can_user_see_group(groupID, user):
+    return (groupID in user['groups'])
+    
 @app.route('/')
 def root():
     return render_template('index.htm')
     
-@app.route('/channel.html')
-def channel():
-    return '<script src="//connect.facebook.net/en_US/all.js"></script>'
-    
 @app.route('/<gid>/')
 def grouppage(gid):
+    user = current_user(session)
+    if not user or not can_user_see_group(gid, user):
+        return render_no_permission_error()
+    
     group = groupledata.get_group(gid)
     
     if group == False:
-        user = facebook.get_user_from_cookie(request.cookies, GROUPLE_APP_ID, GROUPLE_APP_SECRET)
-        return download_group(gid, user)
+        return download_group(gid)
 
     stats = {}
     for stat in Group.stats.keys():
@@ -44,7 +64,12 @@ def grouppage(gid):
         
     return render_template('group.htm', group=group.get_template_vars(), stats=stats)
     
-def download_group(gid, user):
+def download_group(gid):
+    user = current_user(session)
+    if not user or not can_user_see_group(gid, user):
+        return render_no_permission_error()
+
+    # TODO: threads and websockets
     try:
         feed = groupledata.downloadGroupJSON(gid, user['access_token'])
     except facebook.GraphAPIError as e:
@@ -54,19 +79,22 @@ def download_group(gid, user):
     group = Group(gid, feed['name'])
     groupledata.populate_data(group, feed)
     groupledata.add_group(group)
-    return render_template('error.htm', no_nav=True, error={'title': 'Processing...', 'message': 'We\'re crunching the numbers now. Refresh this in a bit to see results.'})
+    return render_template('error.htm', no_nav=True, error={'title': 'PLACEHOLDER', 'message': 'REFRESH TO SEE YOUR RESULTS, THIS IS GOING TO BE SOME COOL DOWNLOADING STUFF'})
     
-@app.route('/<gid>/m/<name>')
+@app.route('/<gid>/<name>')
 def member(gid, name):
+    user = current_user(session)
+    if not user or not can_user_see_group(gid, user):
+        return render_no_permission_error()
+        
     group = groupledata.get_group(gid)
     
     if group == False:
-        user = facebook.get_user_from_cookie(request.cookies, GROUPLE_APP_ID, GROUPLE_APP_SECRET)
-        return download_group(gid, user)
+        return download_group(gid)
         
     m = group.get_member(name)
     if m == None:
-        return render_template('error.htm', error={'title': 'Member not found', 'message': 'That member doesn\'t exist, dude.'})
+        return render_template('error.htm', group=group.get_template_vars(), error={'title': 'Member not found', 'message': 'That member doesn\'t exist, dude.'})
         
     stats = {}
     for stat in Member.stats.keys():

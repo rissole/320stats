@@ -10,6 +10,16 @@ def get_group(gid):
     
 def add_group(group):
     _groups[group.get_gid()] = group
+    
+def fetch_groups_for_user(oauth):
+    try:
+        graph = facebook.GraphAPI(oauth)
+        groups = graph.get_object('/me/groups', fields="id")
+        if 'error' in groups or not groups['data']:
+            return []
+        return [ g['id'] for g in groups['data'] ]
+    except GraphAPIError:
+        return []
 
 def downloadGroupJSON(groupID, oauth):
     graph = facebook.GraphAPI(oauth)
