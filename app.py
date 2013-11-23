@@ -64,17 +64,19 @@ def grouppage(gid):
         
     return render_template('group.htm', group=group.get_template_vars(), stats=stats)
     
-def download_group(gid):
-    user = current_user(session)
-    if not user or not can_user_see_group(gid, user):
-        return render_no_permission_error()
-        
-    first = False
-    if not groupledata.is_group_downloading(gid):
+def download_group(gid):       
+    status = groupledata.get_download_status(gid)
+    downloading_message = 'We\'re crunching the numbers for your group as you read this sentence. Refresh the page after a while to see if we\'re ready.'
+    if status and status['result'] == 'downloading':
+        return render_template('error.htm', no_nav=True, error={'title': 'It\'s not TIME yet...', 'message': downloading_message})
+    elif status and status['result'] == 'error':
+        if status['error'] == 'An unknown error occurred':
+            return render_template('error.htm', no_nav=True, error={'title': 'Oh jeez...', 'message': 'That group was too big for this little webapp to handle, try a different group.'})
+        return render_template('error.htm', no_nav=True, error={'title': 'Oh jeez...', 'message': u'Something went wrong \xaf\\_(\uFF82)_/\xaf'})
+    else:
+        user = current_user(session)
         groupledata.start_group_download(gid, user['access_token'])
-        first = True
-     
-    return render_template('error.htm', no_nav=True, error={'title': 'STILL Downloading...' if not first else 'Downloading...', 'message': 'We\'re crunching the numbers as you read this sentence. Refresh the page after a while to see if we\'re ready.'})
+        return render_template('error.htm', no_nav=True, error={'title': 'I\'m on it!', 'message': downloading_message})
     
 @app.route('/<gid>/<name>')
 def member(gid, name):

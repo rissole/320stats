@@ -4,8 +4,11 @@ import re
 import threading
 from group import Group
 
+# gid -> group obj
 _groups = {}
-_downloading_groups = []
+
+# gid -> {'result': [downloading|complete|error], 'error': error string}
+_download_status = {}
 
 def get_group(gid):
     # todo: check lastcheck < 1 day or whatever
@@ -89,11 +92,11 @@ def populate_data(group, d):
     group.calc_comments_per_member()
     group.calc_comment_likes_per_member()
     
-def is_group_downloading(gid):
-    return (gid in _downloading_groups)
+def get_download_status(gid):
+    return _download_status.get(gid)
     
 def start_group_download(gid, oauth):
-    _downloading_groups.append(gid)
+    _download_status[gid] = {'result': 'downloading'}
     t = threading.Thread(target=download_group_thread, args = (gid, oauth))
     t.start()
     
@@ -104,9 +107,7 @@ def download_group_thread(gid, oauth):
         group = Group(gid, feed['name'])
         populate_data(group, feed)
         add_group(group)
-        _downloading_groups.remove(gid)
+        _download_status[gid] = {'result': 'complete'}
         print "Got group",gid
     except facebook.GraphAPIError as e:
-        print "Didnt get group",gid,"|",e
-        if e.message == "An unknown error occurred":
-            return 0 #render_template('error.htm', no_nav=True, error={'title': 'Oh jeez...', 'message': 'That group was too big for this little webapp to handle, try a different group.'})
+        _download_status[gid] = {'result': 'error', 'error': e.message}
