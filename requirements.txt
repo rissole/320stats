@@ -7,4 +7,5 @@ facebook-sdk==0.4.0
 gevent==0.13.8
 gevent-websocket==0.3.6
 greenlet==0.4.1
+gunicorn==18.0
 itsdangerous==0.23
