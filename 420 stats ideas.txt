@@ -24,3 +24,8 @@ most liked posts
 most liked comments
 overall comment word cloud
 estimated facebook server usage
+
+%ages of all the pies
+pies: make 'other', ignore 0s, etc
+'Me' at top of member stats
+make individual stats more obvious

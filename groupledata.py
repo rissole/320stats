@@ -10,6 +10,9 @@ _groups = {}
 # gid -> {'result': [downloading|complete|error], 'error': error string}
 _download_status = {}
 
+# websockets that are open
+_sockets = []
+
 def get_group(gid):
     # todo: check lastcheck < 1 day or whatever
     return _groups.get(gid, False)
@@ -20,7 +23,7 @@ def add_group(group):
 def fetch_groups_for_user(oauth):
     try:
         graph = facebook.GraphAPI(oauth)
-        groups = graph.get_object('/me/groups', fields="id")
+        groups = graph.get_object('/me/groups', fields='id')
         if 'error' in groups or not groups['data']:
             return []
         return [ g['id'] for g in groups['data'] ]
@@ -92,6 +95,9 @@ def populate_data(group, d):
     group.calc_comments_per_member()
     group.calc_comment_likes_per_member()
     
+def register_socket(ws):
+    _sockets.append(ws)
+    
 def get_download_status(gid):
     return _download_status.get(gid)
     
@@ -101,6 +107,7 @@ def start_group_download(gid, oauth):
     t.start()
     
 def download_group_thread(gid, oauth):
+    global _sockets
     try:
         print "getting group",gid
         feed = downloadGroupJSON(gid, oauth)
@@ -110,4 +117,10 @@ def download_group_thread(gid, oauth):
         _download_status[gid] = {'result': 'complete'}
         print "Got group",gid
     except facebook.GraphAPIError as e:
+        print "failed getting group",gid,":",e.message
         _download_status[gid] = {'result': 'error', 'error': e.message}
+        
+    for ws in _sockets:
+        if ws is not None:
+            ws.send(gid)
+    _sockets = filter(lambda ws: ws is not None, _sockets)
